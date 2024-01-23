@@ -3,7 +3,7 @@
 Run in terminal to get it spinning:
 
 ```shell
-$ sh install.sh
+$ sh start.sh
 ```
 
 ## [Common] Apps Includes

@@ -1,13 +1,7 @@
 #! /bin/bash
 
 clear
-echo "Starting dev setup 👨‍💻"
-
-# Verifique se um argumento de e-mail foi fornecido
-if [ -z "$1" ]; then
-  echo "Por favor, forneça um e-mail como argumento \`sh dev.sh your_email@example.com\`."
-  exit 1
-fi
+echo "💻 => Starting dev setup"
 
 # Check brew
 if ! which brew >/dev/null; then
@@ -19,35 +13,33 @@ fi
 
 # Brew taps
 brew tap homebrew/cask-fonts
-brew tap AdoptOpenJDK/openjdk
 
 # Brew installs
-brew install nvm \
-yarn \
-cocoapods \
-watchman \
-imagemagick \
-pyenv \
-fastlane \
-figma \
-fig \
-flipper \
-sourcetree \
-postman \
-visual-studio-code \
-android-studio \
-reactotron \
-font-fira-code \
-flutter \
-iterm2 \
-zsh \
-adoptopenjdk
+brew install android-studio \
+  cocoapods \
+  fastlane \
+  figma \
+  flipper \
+  font-cascadia-code \
+  font-fira-code \
+  mas \
+  microsoft-teams \
+  n \
+  openfortivpn \
+  openjdk@11 \
+  postman \
+  pyenv \
+  visual-studio-code \
+  warp \
+  watchman \
+  yarn
 
-# Add NVM to zshrc
+# Setup JDK 11
+echo 'export PATH="/opt/homebrew/opt/openjdk@11/bin:$PATH"' >> ~/.zshrc
+
+# Add NVM and ANDROID_HOME to zshrc
 cat << EOF >> ~/.zshrc
-# NVM
-export NVM_DIR=~/.nvm
-source \$(brew --prefix nvm)/nvm.sh
+# ANDROID
 export ANDROID_HOME=\$HOME/Library/Android/sdk
 export PATH=\$PATH:\$ANDROID_HOME/platform-tools
 export PATH=\$PATH:\$ANDROID_HOME/tools
@@ -59,12 +51,14 @@ EOF
 source ~/.zshrc
 
 # Setup Node
-nvm install node
-nvm alias default node
+export N_PREFIX=$HOME/.n
+export PATH=$N_PREFIX/bin:$PATH
+
+n lts
 
 # Yarn global packages
-yarn global add yalc
-yarn global add firebase-tools
+yarn global add yalc \
+  firebase-tools
 
 # Setup Pyenv
 pyenv install 3.11.3
@@ -73,44 +67,16 @@ echo -e 'if command -v pyenv 1>/dev/null 2>&1; then\n  eval "$(pyenv init -)"\nf
 
 echo "Fixing the damn PATH"
 
-
 # Install OhMyZsh
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
-
-# Fix Husky prehooks
-echo "export PATH="$(dirname $(which node)):$PATH"" > ~/.huskyrc
-
-# Add SSH key to Github
-# Testa a conexão SSH com o GitHub
-ssh_output=$(ssh -T git@github.com 2>&1)
-
-# Verifica se a saída contém a string "successfully authenticated"
-if [[ $ssh_output == *"successfully authenticated"* ]]; then
-  echo "SSH para GitHub já está configurado!"
-else
-  echo "Configurando SSH para GitHub..."
-    ssh-keygen -t rsa -b 4096 -C "$1"
-    eval "$(ssh-agent -s)"
-    ssh-add ~/.ssh/id_rsa
-    pbcopy < ~/.ssh/id_rsa.pub
-    echo "SSH key (id_rsa) copiada para o clipboard."
-fi
-
-# Adiciona chave ssh no .zshrc
-cat << EOF >> ~/.zshrc
-# SSH
-eval "\$(ssh-agent -s)"
-ssh-add ~/.ssh/id_rsa
-EOF
-
-# Source zshrc
-source ~/.zshrc
 
 # XCode
 mas install 497799835 # Xcode
 xcode-select --install
 sudo xcodebuild -license accept
 xcode-select --switch /Applications/Xcode.app
+
+mas install 937984704 # Amphetamine
 
 # End
 echo "Dev setup finished! ✅"
